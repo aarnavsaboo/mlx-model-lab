@@ -1,0 +1,1 @@
+Explain why hybrid retrieval can outperform either lexical or dense retrieval alone.

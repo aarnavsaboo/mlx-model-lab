@@ -1,0 +1,9 @@
+{
+  "models": [
+    "mlx-community/Qwen3-4B-4bit",
+    "mlx-community/Qwen3-8B-4bit"
+  ],
+  "prompt_files": ["prompts/short.txt", "prompts/long.txt"],
+  "max_tokens": [64, 256],
+  "temperature": [0.0]
+}
