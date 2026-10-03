@@ -13,7 +13,7 @@ def expand(config: dict) -> list[Job]:
     max_tokens = _list(config.get("max_tokens", [128]))
     temperatures = _list(config.get("temperature", [0.0]))
     modes = _list(config.get("mode", ["warm"]))
-    repeats = range(int(config.get("repeats", 3)))
+    repeats = range(int(config.get("repeats", 1)))
     extra_args = tuple(config.get("extra_args", []))
 
     jobs = []
