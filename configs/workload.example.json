@@ -1,0 +1,16 @@
+{
+  "name": "local-summary-sweep",
+  "models": [
+    "mlx-community/Qwen3-4B-4bit",
+    "mlx-community/Qwen3-8B-4bit"
+  ],
+  "prompt_files": [
+    "prompts/short.txt",
+    "prompts/long.txt"
+  ],
+  "max_tokens": [64, 192],
+  "temperature": [0.0],
+  "mode": ["cold", "warm"],
+  "repeats": 3,
+  "extra_args": []
+}

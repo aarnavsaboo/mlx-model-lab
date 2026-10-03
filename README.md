@@ -1,24 +1,79 @@
 # mlx-model-lab
 
-Experiments for running and comparing local language models with MLX on Apple Silicon.
+Local language-model experimentation on Apple Silicon using MLX-oriented workflows.
 
-The lab keeps model configuration, prompt sweeps, process timing and memory samples in machine-readable records so changes in quantization, context length or generation size can be compared without relying on terminal impressions.
+This repository is a collection of runners and experiment utilities for treating local inference as a repeatable workload rather than a one-off terminal command. It focuses on model loading, prompt processing, generation throughput, memory behaviour, context-length sweeps, quantized variants and batch experiment plans.
 
-## Areas
+The core idea is simple: define an experiment once, expand it into concrete jobs, keep every raw observation, and build reports afterwards.
 
-- MLX-LM command orchestration
-- model load vs generation time
-- prompt-length and output-length sweeps
-- repeated warm runs
-- process resident-memory sampling
-- quantized model comparisons
-- batch matrices that preserve the exact command used
+## Experiment workflow
 
-```bash
-python -m mlx_model_lab matrix configs/example.json
-python -m mlx_model_lab run --model mlx-community/Qwen3-4B-4bit --prompt prompts/short.txt
+```text
+manifest.json
+    |
+    v
+matrix expansion
+    |
+    +--> model A / prompt 1 / 64 tokens / cold
+    +--> model A / prompt 1 / 64 tokens / warm
+    +--> model A / prompt 2 / 256 tokens / warm
+    +--> model B / prompt 1 / 64 tokens / cold
+    |
+    v
+job runner
+    |
+    +--> stdout/stderr capture
+    +--> wall clock timing
+    +--> process memory samples
+    +--> exact command record
+    |
+    v
+raw JSONL
+    |
+    v
+aggregate report
 ```
 
-This repository does not bundle model weights or fixed benchmark claims. It is a runner for experiments on the machine where the models actually live.
+## Areas of experimentation
+
+- model load vs steady-state generation time
+- prompt-length scaling
+- output-length scaling
+- repeated warm inference
+- 4-bit / 6-bit / 8-bit model variants when available
+- process-level resident memory sampling
+- batch scheduling across a single workstation
+- throughput vs latency at different job concurrency
+- small-model vs larger-model task sweeps
+- context-window stress tests
+
+## Example
+
+```bash
+python -m mlx_model_lab plan configs/workload.example.json > runs/plan.jsonl
+
+python -m mlx_model_lab execute \
+  runs/plan.jsonl \
+  --output runs/raw.jsonl
+
+python -m mlx_model_lab report runs/raw.jsonl
+```
+
+The runner stores the exact command used for each job. That matters because local model behaviour can change with model revision, quantization, generation budget and runtime options.
+
+## Repository layout
+
+- `mlx_model_lab/matrix.py` — Cartesian experiment expansion
+- `mlx_model_lab/jobs.py` — workload records and deterministic job IDs
+- `mlx_model_lab/runner.py` — MLX-LM process runner
+- `mlx_model_lab/memory.py` — process memory sampling
+- `mlx_model_lab/executor.py` — sequential/bounded execution
+- `mlx_model_lab/report.py` — grouped statistics
+- `configs/` — example experiment manifests
+- `prompts/` — small reproducible workload fixtures
+- `docs/` — experiment design notes
+- `tests/` — deterministic tests that do not require model weights
+
+The repository does not commit benchmark leaderboards. Results are meaningful only together with the machine, model build, runtime version and workload that produced them.
 
 Maintained by **Aarnav Saboo**.

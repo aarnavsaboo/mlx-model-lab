@@ -2,31 +2,39 @@ from argparse import ArgumentParser
 from pathlib import Path
 import json
 
+from .executor import execute, write_jsonl
+from .io import read_jobs, read_rows
 from .matrix import expand
-from .runner import run, read_prompt
+from .report import summarize
 
 
 def main():
     parser = ArgumentParser()
     sub = parser.add_subparsers(dest="cmd", required=True)
-    m = sub.add_parser("matrix")
-    m.add_argument("config")
-    r = sub.add_parser("run")
-    r.add_argument("--model", required=True)
-    r.add_argument("--prompt")
-    r.add_argument("--prompt-file")
-    r.add_argument("--max-tokens", type=int, default=128)
-    r.add_argument("--temperature", type=float, default=0.0)
+
+    plan = sub.add_parser("plan")
+    plan.add_argument("config")
+
+    execute_cmd = sub.add_parser("execute")
+    execute_cmd.add_argument("plan")
+    execute_cmd.add_argument("--output", required=True)
+    execute_cmd.add_argument("--workers", type=int, default=1)
+
+    report = sub.add_parser("report")
+    report.add_argument("path")
+
     args = parser.parse_args()
 
-    if args.cmd == "matrix":
-        cfg = json.loads(Path(args.config).read_text())
-        for row in expand(cfg):
-            print(json.dumps(row))
-        return
-
-    prompt = args.prompt if args.prompt is not None else read_prompt(args.prompt_file)
-    print(json.dumps(run(args.model, prompt, args.max_tokens, args.temperature).to_dict(), indent=2))
+    if args.cmd == "plan":
+        config = json.loads(Path(args.config).read_text(encoding="utf-8"))
+        for job in expand(config):
+            print(json.dumps(job.to_dict(), sort_keys=True))
+    elif args.cmd == "execute":
+        rows = execute(read_jobs(args.plan), workers=args.workers)
+        write_jsonl(args.output, rows)
+        print(json.dumps({"completed": len(rows), "ok": sum(bool(x.get("ok")) for x in rows)}))
+    else:
+        print(json.dumps(summarize(read_rows(args.path)), indent=2))
 
 
 if __name__ == "__main__":
