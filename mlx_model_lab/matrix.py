@@ -7,7 +7,7 @@ def _list(value):
 
 
 def expand(config: dict) -> list[Job]:
-    experiment = str(config["name"])
+    experiment = str(config.get("name", "experiment"))
     models = _list(config["models"])
     prompts = _list(config["prompt_files"])
     max_tokens = _list(config.get("max_tokens", [128]))
