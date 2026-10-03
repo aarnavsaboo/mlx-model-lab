@@ -5,10 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mlx-model-lab"
 version = "0.1.0"
+description = "Repeatable MLX-oriented experiment tooling for language-model inference on Apple Silicon."
+readme = "README.md"
 requires-python = ">=3.10"
+authors = [{name = "Aarnav Saboo"}]
+keywords = ["mlx", "llm", "apple-silicon", "inference", "benchmarking"]
 
 [project.scripts]
 mlx-model-lab = "mlx_model_lab.__main__:main"
+
+[project.urls]
+Repository = "https://github.com/aarnavsaboo/mlx-model-lab"
 
 [tool.setuptools.packages.find]
 include = ["mlx_model_lab*"]
